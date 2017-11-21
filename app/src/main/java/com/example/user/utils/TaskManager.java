@@ -1,79 +1,114 @@
 package com.example.user.utils;
 
 import android.app.ActivityManager;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Debug;
 import android.util.Log;
 
 import com.example.user.bean.AppInfo;
 import com.example.user.bean.PackagesInfo;
+import com.example.user.model.ProcessAlive;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.ACTIVITY_SERVICE;
-import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 
 /**
  * Created by user on 2017/11/20.
+ * 任务管理
  */
 
 public class TaskManager {
-    //获取后台应用列表
+    private static String TAG = "TaskManager " ;
+    /**
+     *     获取后台应用列表
+     */
     public static List<AppInfo> getAppInfoList(Context mCtx){
-        PackagesInfo pi = new PackagesInfo(mCtx);
-        ActivityManager mActivityManager = (ActivityManager) mCtx.getSystemService(ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> runList = mActivityManager.getRunningAppProcesses();
+        PackagesInfo pi =  PackagesInfo.getPackagesInfo(mCtx);
+        ProcessAlive processAlive =  ProcessAlive.getProcessAlive() ;
+        ActivityManager mActivityManager = (ActivityManager)
+                mCtx.getSystemService(ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> runList =
+                mActivityManager.getRunningAppProcesses();
         PackageManager pm = mCtx.getPackageManager();
        List<AppInfo> mList = new ArrayList<>();
         for (ActivityManager.RunningAppProcessInfo ra : runList) {
             ApplicationInfo applicationInfo = pi.getInfo(ra.processName);
-            if (applicationInfo == null || ra.processName.equals("system") || ra.processName.equals
+            if (applicationInfo == null || ra.processName.equals
                     (mCtx.getPackageName())) {
                 continue;
             }
+
             AppInfo appInfo = new AppInfo();
-            Debug.MemoryInfo[] memoryInfo = mActivityManager.getProcessMemoryInfo(new int[]{ra.pid});
+            if( ra.processName.equals("system") ){
+                appInfo.setLock(true);
+                appInfo.setSystem(true);
+            }
+            Debug.MemoryInfo[] memoryInfo = mActivityManager.
+                    getProcessMemoryInfo(new int[]{ra.pid});
             appInfo.setPackageName(applicationInfo.packageName);
-            appInfo.setIcon(applicationInfo.loadIcon(pm));
+//            appInfo.setIcon(applicationInfo.loadIcon(pm));
             appInfo.setName(applicationInfo.loadLabel(pm).toString());
             appInfo.setMemory(TextFormat.formatByte(memoryInfo[0].dalvikPrivateDirty));
+            appInfo.setLock(processAlive.isAlive(appInfo));
             mList.add(appInfo);
         }
         return mList ;
     }
 
+    /**
+     * 杀掉进程
+     * @param mCtx
+     * @param list
+     */
+    public static void  killProcess(Context mCtx,List<AppInfo> list){
+        Log.i(TAG, "killProcess: clear start  list size is "+list.size());
 
-    private static void getTopApp(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                UsageStatsManager m = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-            if (m != null) {
-                long now = System.currentTimeMillis();
-                //获取60秒之内的应用数据
-                List<UsageStats> stats = m.queryUsageStats(UsageStatsManager.INTERVAL_BEST, now - 60 * 1000, now);
-                Log.i(TAG, "Running app number in last 60 seconds : " + stats.size());
-
-                String topActivity = "";
-
-                //取得最近运行的一个app，即当前运行的app
-                if ((stats != null) && (!stats.isEmpty())) {
-                    int j = 0;
-                    for (int i = 0; i < stats.size(); i++) {
-                        if (stats.get(i).getLastTimeUsed() > stats.get(j).getLastTimeUsed()) {
-                            j = i;
-                        }
-                    }
-                    topActivity = stats.get(j).getPackageName();
-                }
-                Log.i(TAG, "top running app is : "+topActivity);
+        List<AppInfo> copy = new ArrayList<>() ;
+        for(AppInfo appInfo : list){
+            if(!appInfo.isLock()){
+                boolean b = killProcess(mCtx.getApplicationContext()
+                        ,appInfo.getPackageName());
+                Log.i(TAG, "killProcess: kill"+b);
+                if(!b)copy.add(appInfo);
             }
         }
+        list.clear();
+        list.addAll(copy) ;
+        Log.i(TAG, "killProcess: clear finish  list size is "+list.size());
+    }
+
+    /**
+     * 杀进程(非白名单内的进程)
+     * @param mCtx 上下文
+     * @param packageName 包名
+     * @return  杀除成功
+     */
+    public static boolean killProcess(Context mCtx, String packageName) {
+        PackagesInfo pi =  PackagesInfo.getPackagesInfo(mCtx);
+        ActivityManager mActivityManager = (ActivityManager) mCtx
+                .getSystemService(ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> runList =
+                mActivityManager.getRunningAppProcesses();
+        for (ActivityManager.RunningAppProcessInfo runServiceInfo : runList) {
+            ApplicationInfo applicationInfo = pi.getInfo(runServiceInfo.processName);
+            if (applicationInfo == null || runServiceInfo.processName.equals("system")
+                    || runServiceInfo.processName.equals
+                    (mCtx.getPackageName())) {
+                continue;
+            }
+            String pkgName = applicationInfo.packageName; // 包名
+            if (pkgName.equals(packageName)) {
+                mActivityManager.killBackgroundProcesses(packageName);
+                return true ;
+            }
+
+        }
+        return false ;
     }
     /**
      * 获取当前应用名称
@@ -105,6 +140,8 @@ public class TaskManager {
         // 通过调用ActivityManager的getRunningAppServicees()方法获得系统里所有正在运行的进程
         List<ActivityManager.RunningServiceInfo> runServiceList = mActivityManager
                 .getRunningServices(50);
+        List<ActivityManager.RunningAppProcessInfo> runList =
+                mActivityManager.getRunningAppProcesses();
         System.out.println(runServiceList.size());
         // ServiceInfo Model类 用来保存所有进程信息
         for (ActivityManager.RunningServiceInfo runServiceInfo : runServiceList) {
@@ -133,5 +170,8 @@ public class TaskManager {
             return true ;
         }
         return false ;
+    }
+    public static void  saveAliveProcess(Context mCtx,AppInfo appInfo){
+
     }
 }

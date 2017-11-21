@@ -7,9 +7,17 @@ import android.content.pm.PackageManager;
 import java.util.List;
 
 public class PackagesInfo {
-    private List<ApplicationInfo> appList;
+    private List<ApplicationInfo> appList ;
 
-    public PackagesInfo(Context context) {
+    public static PackagesInfo getPackagesInfo(Context mCtx) {
+        if(null == packagesInfo)
+            packagesInfo = new PackagesInfo(mCtx) ;
+        return packagesInfo;
+    }
+
+    public static PackagesInfo packagesInfo  ;
+
+    private PackagesInfo(Context context) {
         PackageManager pm = context.getApplicationContext().getPackageManager();
         appList = pm.getInstalledApplications(0);
     }

@@ -13,7 +13,7 @@ public class CpuManager {
     /** get CPU rate
      * @return
      */
-    private int getProcessCpuRate() {
+    public static int getProcessCpuRate() {
 
         StringBuilder tv = new StringBuilder();
         int rate = 0;
@@ -44,7 +44,6 @@ public class CpuManager {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        System.out.println(rate + "");
         return rate;
     }
 }

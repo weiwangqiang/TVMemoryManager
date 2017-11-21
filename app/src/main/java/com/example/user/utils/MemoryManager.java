@@ -12,7 +12,7 @@ import java.io.IOException;
     获取内存使用情况
   */
 
-public class MoneyManager {
+public class MemoryManager {
     /**
      * 用于获取手机可用内存
      */

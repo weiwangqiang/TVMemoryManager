@@ -1,13 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:orientation="vertical"
     android:layout_height="match_parent">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:layout_height="wrap_content">
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="hello world "/>
-    <Button
-        android:layout_width="wrap_content"
+        android:layout_margin="20dp"
+        android:id="@+id/cpuText"
+        android:layout_weight="1"
+        android:text="使用：0%"/>
+    <TextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="进程管理"/>
+        android:layout_margin="20dp"
+        android:id="@+id/memory"
+        android:layout_weight="1"
+        android:text="0/m "/>
+</LinearLayout>
+  <include
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      layout="@layout/activity_back_manager_view"/>
 </LinearLayout>

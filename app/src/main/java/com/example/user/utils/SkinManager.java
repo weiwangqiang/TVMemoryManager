@@ -1,4 +1,4 @@
-package juhe.jiangdajiuye.util;
+package com.example.user.utils;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;
@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import juhe.jiangdajiuye.core.MyApplication;
+import com.example.user.core.BaseApplication;
 
 /**
  * @author wangqiang
@@ -29,7 +29,7 @@ public class SkinManager {
         return mSkinManager  ;
     }
     public static View inflater(@LayoutRes int layout){
-        return inflater(MyApplication.getContext(), layout);
+        return inflater(BaseApplication.getmCtx(), layout);
     }
     public static View inflater(Context mCtx , @LayoutRes int layout){
         return inflater(mCtx, layout, null, false);
