@@ -10,7 +10,9 @@ import java.io.InputStreamReader;
  */
 
 public class CpuManager {
-    /** get CPU rate
+    /**
+     * get CPU rate
+     *
      * @return
      */
     public static int getProcessCpuRate() {

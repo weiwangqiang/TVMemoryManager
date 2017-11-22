@@ -9,8 +9,8 @@ import java.io.IOException;
 
 /**
  * Created by user on 2017/11/20.
-    获取内存使用情况
-  */
+ * 获取内存使用情况
+ */
 
 public class MemoryManager {
     /**
@@ -38,11 +38,11 @@ public class MemoryManager {
         }
         return "";
     }
+
     /**
      * 获取当前可用内存，返回数据以字节为单位。
      *
-     * @param context
-     *            可传入应用程序上下文。
+     * @param context 可传入应用程序上下文。
      * @return 当前可用内存。
      */
     private static long getAvailableMemory(Context context) {
@@ -50,6 +50,7 @@ public class MemoryManager {
         getActivityManager(context).getMemoryInfo(mi);
         return mi.availMem;
     }
+
     private static ActivityManager getActivityManager(Context context) {
         if (mActivityManager == null) {
             mActivityManager = (ActivityManager) context

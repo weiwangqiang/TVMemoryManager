@@ -59,29 +59,6 @@ public class TaskManager {
         }
         return mList ;
     }
-
-    /**
-     * 杀掉进程
-     * @param mCtx
-     * @param list
-     */
-    public static void  killProcess(Context mCtx,List<AppInfo> list){
-        Log.i(TAG, "killProcess: clear start  list size is "+list.size());
-
-        List<AppInfo> copy = new ArrayList<>() ;
-        for(AppInfo appInfo : list){
-            if(!appInfo.isLock()){
-                boolean b = killProcess(mCtx.getApplicationContext()
-                        ,appInfo.getPackageName());
-                Log.i(TAG, "killProcess: kill"+b);
-                if(!b)copy.add(appInfo);
-            }
-        }
-        list.clear();
-        list.addAll(copy) ;
-        Log.i(TAG, "killProcess: clear finish  list size is "+list.size());
-    }
-
     /**
      * 杀进程(非白名单内的进程)
      * @param mCtx 上下文

@@ -16,9 +16,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    greendao {
-        targetGenDir 'src/main/java'
-    }
+//    greendao {
+//        targetGenDir 'src/main/java'
+//    }
 }
 
 dependencies {

@@ -20,6 +20,20 @@ public class AppInfo {
 
     private boolean system  ;
 
+    @Generated(hash = 1297690314)
+    public AppInfo(String packageName, String name, String memory, boolean lock,
+            boolean system) {
+        this.packageName = packageName;
+        this.name = name;
+        this.memory = memory;
+        this.lock = lock;
+        this.system = system;
+    }
+
+    @Generated(hash = 1656151854)
+    public AppInfo() {
+    }
+
     public boolean isSystem() {
         return system;
     }
@@ -36,19 +50,6 @@ public class AppInfo {
         this.lock = lock;
     }
 
-    @Generated(hash = 343680710)
-    public AppInfo(String packageName, String name, String memory, boolean system,
-            boolean lock) {
-        this.packageName = packageName;
-        this.name = name;
-        this.memory = memory;
-        this.system = system;
-        this.lock = lock;
-    }
-
-    @Generated(hash = 1656151854)
-    public AppInfo() {
-    }
     public String getPackageName() {
         return packageName;
     }
@@ -81,5 +82,13 @@ public class AppInfo {
             return appInfo.packageName .equals(this.packageName );
         }
         return false ;
+    }
+
+    public boolean getSystem() {
+        return this.system;
+    }
+
+    public boolean getLock() {
+        return this.lock;
     }
 }

@@ -3,10 +3,10 @@ package com.example.user.db;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.example.user.bean.AppInfo;
+import com.example.user.core.BaseApplication;
 import com.example.user.dao.AppInfoDao;
 import com.example.user.dao.DaoMaster;
 import com.example.user.dao.DaoSession;
-import com.example.user.core.BaseApplication;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
@@ -18,13 +18,13 @@ import java.util.List;
 
 public class DataBaseHelper {
     private final static String dbName = "APP_INFO";
-    private DaoMaster.DevOpenHelper openHelper;
+    private DaoMaster.DevOpenHelper mOpenHelper;
 
     public static DataBaseHelper getDataBaseHelper() {
-        return dataBaseHelper;
+        return mDataBaseHelper;
     }
 
-    public static DataBaseHelper dataBaseHelper  = new DataBaseHelper() ;
+    public static DataBaseHelper mDataBaseHelper  = new DataBaseHelper() ;
     private  DataBaseHelper(){
     }
     public void addAlive(AppInfo appInfo){
@@ -54,22 +54,22 @@ public class DataBaseHelper {
      * 获取可读数据库
      */
     private SQLiteDatabase getReadableDatabase() {
-        if (openHelper == null) {
-            openHelper = new DaoMaster.DevOpenHelper(
+        if (mOpenHelper == null) {
+            mOpenHelper = new DaoMaster.DevOpenHelper(
                     BaseApplication.getmCtx(), dbName, null);
         }
-        SQLiteDatabase db = openHelper.getReadableDatabase();
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         return db;
     }
     /**
      * 获取可写数据库
      */
     private SQLiteDatabase getWritableDatabase() {
-        if (openHelper == null) {
-            openHelper = new DaoMaster.DevOpenHelper(
+        if (mOpenHelper == null) {
+            mOpenHelper = new DaoMaster.DevOpenHelper(
                     BaseApplication.getmCtx(), dbName, null);
         }
-        SQLiteDatabase db = openHelper.getWritableDatabase();
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         return db;
     }
 }

@@ -57,9 +57,9 @@ public class BgAdapter extends AbsAdapter<AppInfo> {
 
         public BgItemViewHolder(View itemView) {
             super(itemView);
-            packageName = (TextView) getView(R.id.package_name);
-            lock = (TextView) getView(R.id.lock);
-            name = (TextView) getView(R.id.name);
+            packageName = (TextView) itemView.findViewById(R.id.package_name);
+            lock = (TextView) itemView.findViewById(R.id.lock);
+            name = (TextView) itemView.findViewById(R.id.name);
         }
 
     }

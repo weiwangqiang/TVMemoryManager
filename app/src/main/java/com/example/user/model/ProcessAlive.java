@@ -14,41 +14,47 @@ import java.util.List;
  */
 
 public class ProcessAlive {
-    public static ProcessAlive getProcessAlive() {
-        return processAlive;
-    }
-    private static String TAG = "ProcessAlive" ;
-    public static ProcessAlive processAlive = new ProcessAlive() ;
-    private  DataBaseHelper dataBaseHelper ;
+    private static String TAG = "ProcessAlive";
+    public static ProcessAlive mProcessAlive = new ProcessAlive();
+    private DataBaseHelper mDataBaseHelper;
+
     public List<AppInfo> getAliveList() {
-        return aliveList;
+        return mAiveList;
     }
 
-    public List<AppInfo> aliveList = new ArrayList<>();
+    public List<AppInfo> mAiveList = new ArrayList<>();
+
+    public static ProcessAlive getProcessAlive() {
+        return mProcessAlive;
+    }
+
     //初始化白名单
-    private ProcessAlive(){
-         dataBaseHelper = DataBaseHelper.getDataBaseHelper() ;
-         aliveList.addAll(dataBaseHelper.getAliveList() );
+    private ProcessAlive() {
+        mDataBaseHelper = DataBaseHelper.getDataBaseHelper();
+        mAiveList.addAll(mDataBaseHelper.getAliveList());
     }
+
     //判断是否是白名单中
-    public boolean isAlive(AppInfo appInfo){
-        if(aliveList.size() == 0) return false;
-        boolean b = aliveList.contains(appInfo);
-        return  b  ;
+    public boolean isAlive(AppInfo appInfo) {
+        if (mAiveList.size() == 0) return false;
+        boolean b = mAiveList.contains(appInfo);
+        return b;
     }
+
     //解锁
-    public void removeAlive(AppInfo appInfo){
-        if(aliveList.contains(appInfo)){
-            dataBaseHelper.deleteAlive(appInfo);
-            aliveList.remove(appInfo);
-            Log.i(TAG, "removeAlive: remove "+appInfo.getName());
+    public void removeAlive(AppInfo appInfo) {
+        if (mAiveList.contains(appInfo)) {
+            mDataBaseHelper.deleteAlive(appInfo);
+            mAiveList.remove(appInfo);
+            Log.i(TAG, "removeAlive: remove " + appInfo.getName());
         }
     }
+
     //加锁
-    public void addAlive(AppInfo appInfo){
-        dataBaseHelper.addAlive(appInfo);
-        aliveList.add(appInfo) ;
-        Log.i(TAG, "addAlive : add  "+appInfo.getName());
+    public void addAlive(AppInfo appInfo) {
+        mDataBaseHelper.addAlive(appInfo);
+        mAiveList.add(appInfo);
+        Log.i(TAG, "addAlive : add  " + appInfo.getName());
 
     }
 }
