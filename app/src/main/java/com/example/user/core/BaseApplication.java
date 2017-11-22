@@ -9,19 +9,19 @@ import android.content.Context;
 
 public class BaseApplication extends Application {
     public static Application getApplication() {
-        return application;
+        return mApplication;
     }
 
     public static Context getmCtx() {
         return mCtx;
     }
 
-    public static Application application ;
+    public static Application mApplication ;
     public static Context mCtx ;
     @Override
     public void onCreate() {
         super.onCreate();
         mCtx = getApplicationContext();
-        application = this ;
+        mApplication = this ;
     }
 }

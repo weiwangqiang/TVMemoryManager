@@ -11,22 +11,23 @@ import org.greenrobot.greendao.annotation.Generated;
 @Entity
 
 public class AppInfo {
-
     @Id
+
     private String packageName;
-//    private Drawable icon;
     private String name;
     private String memory;
+    private boolean lock;//是否上锁
 
-    public Boolean getSystem() {
+    private boolean system  ;
+
+    public boolean isSystem() {
         return system;
     }
 
-    public void setSystem(Boolean system) {
+    public void setSystem(boolean system) {
         this.system = system;
     }
 
-    private Boolean system = false ;
     public boolean isLock() {
         return lock;
     }
@@ -35,10 +36,8 @@ public class AppInfo {
         this.lock = lock;
     }
 
-    private boolean lock;//是否上锁
-
     @Generated(hash = 343680710)
-    public AppInfo(String packageName, String name, String memory, Boolean system,
+    public AppInfo(String packageName, String name, String memory, boolean system,
             boolean lock) {
         this.packageName = packageName;
         this.name = name;
@@ -57,14 +56,6 @@ public class AppInfo {
     public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
-
-//    public Drawable getIcon() {
-//        return icon;
-//    }
-
-//    public void setIcon(Drawable icon) {
-//        this.icon = icon;
-//    }
 
     public String getName() {
         return name;
@@ -90,9 +81,5 @@ public class AppInfo {
             return appInfo.packageName .equals(this.packageName );
         }
         return false ;
-    }
-
-    public boolean getLock() {
-        return this.lock;
     }
 }

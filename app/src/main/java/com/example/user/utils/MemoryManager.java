@@ -36,7 +36,7 @@ public class MemoryManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "悬浮窗";
+        return "";
     }
     /**
      * 获取当前可用内存，返回数据以字节为单位。

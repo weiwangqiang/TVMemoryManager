@@ -16,6 +16,7 @@ package com.example.user.view;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 import com.example.user.bean.AppInfo;
 import com.example.user.core.BaseApplication;
 import com.example.user.model.ProcessAlive;
+import com.example.user.service.FloatBallService;
 import com.example.user.tvmanager.R;
 import com.example.user.utils.CpuManager;
 import com.example.user.utils.MemoryManager;
@@ -50,15 +52,16 @@ import static com.example.user.utils.MemoryManager.getUsedPercentValue;
  * MainActivity class that loads MainFragment
  */
 public class MainActivity extends Activity {
-    private static String TAG = "MainActivity" ;
-    private TextView cup  ;
-    private TextView memory ;
-    private RecyclerView recyclerView ;
-    private ProcessAlive processAlive = ProcessAlive.getProcessAlive() ;
-    private BgAdapter adapter ;
-    private     Timer timer ;
-    List<AppInfo> list = new ArrayList<>() ;
+    private static String TAG = "MainActivity";
+    private TextView cup;
+    private TextView memory;
+    private RecyclerView recyclerView;
+    private ProcessAlive processAlive = ProcessAlive.getProcessAlive();
+    private BgAdapter adapter;
+    private Timer timer;
+    List<AppInfo> list = new ArrayList<>();
     private Context mCtx = BaseApplication.getmCtx();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,8 +72,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        timer  =new Timer();
-        timer.scheduleAtFixedRate(new RunTask(),0,10*1000);
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new RunTask(), 0, 10 * 1000);
+        startService(new Intent(this, FloatBallService.class));
     }
 
     @Override
@@ -79,57 +83,62 @@ public class MainActivity extends Activity {
         timer.cancel();
     }
 
-    private class  RunTask extends TimerTask{
+    private class RunTask extends TimerTask {
 
         @Override
         public void run() {
             recyclerView.post(new Runnable() {
                 @Override
                 public void run() {
-                    cup.setText("cup使用率："+CpuManager.getProcessCpuRate()+"%");
-                    memory.setText("内存使用率："+MemoryManager.getUsedPercentValue(mCtx));
+                    cup.setText("cup使用率：" + CpuManager.getProcessCpuRate() + "%");
+                    memory.setText("内存使用率：" + getUsedPercentValue(mCtx));
                 }
             });
         }
     }
+
     private void init() {
-        cup= (TextView) findViewById(R.id.cpuText);
+        cup = (TextView) findViewById(R.id.cpuText);
         memory = (TextView) findViewById(R.id.memory);
-        cup.setText("cup使用率："+CpuManager.getProcessCpuRate()+"%");
-        memory.setText("内存使用率："+ getUsedPercentValue(mCtx));
+        cup.setText("cup使用率：" + CpuManager.getProcessCpuRate() + "%");
+        memory.setText("内存使用率：" + getUsedPercentValue(mCtx));
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        adapter = new BgAdapter(this ,R.layout.activity_back_manager_item) ;
-        adapter.setListener(new BgAdapter.onItemClickListener(){
+        adapter = new BgAdapter(this, R.layout.activity_back_manager_item);
+        adapter.setListener(new BgAdapter.onItemClickListener() {
 
             @Override
             public void OnItemClick(AppInfo appInfo) {
-                if(appInfo.isLock()){
+                if (appInfo.isLock()) {
                     processAlive.removeAlive(appInfo);
-                }else{
+                } else {
                     processAlive.addAlive(appInfo);
                 }
                 appInfo.setLock(!appInfo.isLock());
                 adapter.notifyDataSetChanged();
             }
         });
-        LinearLayoutManager manager =  new LinearLayoutManager(this);
+        LinearLayoutManager manager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
         list.addAll(TaskManager.getAppInfoList(getApplication()));
         adapter.upDate(list);
     }
-    int beforeSize = 0 ;
-    public void clear(View view){
-        beforeSize = list.size() ;
-        Log.i(TAG, " start clear: ----- "+list.size());
-         Observable.from(list)
-                .observeOn(Schedulers.newThread())
-                .filter(new Func1<AppInfo,Boolean>(){
+
+    int beforeSize = 0;
+    boolean down = false; //todo
+
+    public void clear(View view) {
+        beforeSize = list.size();
+        down = true;
+        Log.i(TAG, " start clear: ----- " + list.size());
+        Observable.from(list)
+                .observeOn(Schedulers.computation())
+                .filter(new Func1<AppInfo, Boolean>() {
                     @Override
                     public Boolean call(AppInfo appInfo) {
-                        if(appInfo.isLock()) return false ;
-                        return TaskManager.killProcess(mCtx,appInfo.getPackageName());
+                        if (appInfo.isLock()) return false;
+                        return TaskManager.killProcess(mCtx, appInfo.getPackageName());
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
@@ -148,9 +157,9 @@ public class MainActivity extends Activity {
                     @Override
                     public void onNext(AppInfo appInfo) {
                         //被杀掉的进程
-                        Log.i(TAG, "onNext: be killed  "+appInfo.getName());
+                        Log.i(TAG, "onNext: be killed  " + appInfo.getName());
                     }
-                } );
+                });
 
     }
 
@@ -158,9 +167,9 @@ public class MainActivity extends Activity {
         list.clear();
         list.addAll(TaskManager.getAppInfoList(getApplication()));
         adapter.upDate(list);
-        cup.setText("cup使用率："+ CpuManager.getProcessCpuRate()+"%");
-        memory.setText("内存使用率："+ MemoryManager.getUsedPercentValue(mCtx));
-        Toast.makeText(mCtx,"清除前进程数："+beforeSize+"\n " +
-                "清除后进程数 ："+list.size(),Toast.LENGTH_SHORT).show();
+        cup.setText("cup使用率：" + CpuManager.getProcessCpuRate() + "%");
+        memory.setText("内存使用率：" + MemoryManager.getUsedPercentValue(mCtx));
+        Toast.makeText(mCtx, "清除前进程数：" + beforeSize + "\n " +
+                "清除后进程数 ：" + list.size(), Toast.LENGTH_SHORT).show();
     }
 }

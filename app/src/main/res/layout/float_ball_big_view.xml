@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <GridLayout
+        android:id="@+id/gridLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:columnCount="3"
+        android:rowCount="3">
+        <TextView
+            android:id="@+id/textView1"/>
+        <Button
+            android:id="@+id/up"
+            android:text="上"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/textView2"/>
+        <Button
+            android:id="@+id/left"
+            android:text="左"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/menu"
+            android:text="menu"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/right"
+            android:text="右"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/home"
+            android:text="home"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/down"
+            android:text="下"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/back"
+            android:text="back"
+            android:textColor="@color/white" />
+    </GridLayout>
+</FrameLayout>
