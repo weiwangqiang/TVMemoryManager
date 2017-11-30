@@ -1,11 +1,12 @@
-package com.example.user.view.floatBall;
+package com.example.user.customView.floatBall;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+
+import com.example.user.utils.MyWindowManager;
 
 /**
  * Created by user on 2017/11/22.
@@ -22,11 +23,16 @@ public class FloatBallManager {
     private LayoutParams mSmallViewParams;
     private LayoutParams mBigViewParams;
     private LayoutParams mLauncherParams;
+    private int mScreenWidth;
+    private int mScreenHeight;
 
     private FloatBallManager(Context mCtx) {
         this.mCtx = mCtx;
         mWindowManager = (WindowManager) mCtx
                 .getSystemService(Context.WINDOW_SERVICE);
+
+        mScreenWidth = mWindowManager.getDefaultDisplay().getWidth();
+        mScreenHeight = mWindowManager.getDefaultDisplay().getHeight();
     }
 
     public static FloatBallManager getFloatBallManager(Context mCtx) {
@@ -40,60 +46,70 @@ public class FloatBallManager {
     }
 
     public void createSmallFloatView() {
-        int screenWidth = mWindowManager.getDefaultDisplay().getWidth();
-        int screenHeight = mWindowManager.getDefaultDisplay().getHeight();
         if (mSmallView == null) {
             mSmallView = new FloatBallSmallView(mCtx);
             if (mSmallViewParams == null) {
                 mSmallViewParams = new LayoutParams();
-                mSmallViewParams.type = LayoutParams.TYPE_TOAST;
+                mSmallViewParams.type = LayoutParams.TYPE_TOAST;//如果是TV 则改为TYPE_TOAST
                 mSmallViewParams.format = PixelFormat.RGBA_8888;
                 mSmallViewParams.flags =
                         LayoutParams.FLAG_NOT_FOCUSABLE | LayoutParams.FLAG_NOT_TOUCH_MODAL;
                 mSmallViewParams.gravity = Gravity.LEFT | Gravity.TOP;
-                mSmallViewParams.width = mSmallView.windowViewWidth;
-                mSmallViewParams.height = mSmallView.windowViewHeight;
-                mSmallViewParams.x = screenWidth;
-                mSmallViewParams.y = screenHeight / 2;
+                mSmallViewParams.width = mSmallView.mWindowViewWidth;
+                mSmallViewParams.height = mSmallView.mWindowViewHeight;
+                mSmallViewParams.x = mScreenWidth;
+                mSmallViewParams.y = mScreenHeight / 2;
             }
             mSmallView.setParams(mSmallViewParams);
-            mWindowManager.addView(mSmallView, mSmallViewParams);
         }
+        mWindowManager.addView(mSmallView, mSmallViewParams);
     }
 
     public void removeSmallFloatView() {
         if (mSmallView != null) {
             mWindowManager.removeView(mSmallView);
-            mSmallView = null;
         }
     }
 
     public void createBigFloatView() {
-        int screenWidth = mWindowManager.getDefaultDisplay().getWidth();
-        int screenHeight = mWindowManager.getDefaultDisplay().getHeight();
         if (mFloatBallBigView == null) {
             mFloatBallBigView = new FloatBallBigView(mCtx);
             if (mBigViewParams == null) {
                 mBigViewParams = new LayoutParams();
-                mBigViewParams.x = screenWidth / 2
+                mBigViewParams.x = mScreenWidth / 2
                         - mFloatBallBigView.getViewWidth() / 2;
-                mBigViewParams.y = screenHeight / 2
+                mBigViewParams.y = mScreenHeight / 2
                         - mFloatBallBigView.getViewHeight() / 2;
                 mBigViewParams.type = LayoutParams.TYPE_TOAST;
-                mBigViewParams.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL; //设置外部可以点击
+                mBigViewParams.flags =
+                        LayoutParams.FLAG_NOT_FOCUSABLE | LayoutParams.FLAG_NOT_TOUCH_MODAL;
                 mBigViewParams.format = PixelFormat.RGBA_8888;
-//                mBigViewParams.gravity = Gravity.LEFT | Gravity.TOP;//暂时不定
+                mBigViewParams.gravity = Gravity.LEFT | Gravity.TOP;//暂时不定
                 mBigViewParams.width = mFloatBallBigView.getViewWidth();
                 mBigViewParams.height = mFloatBallBigView.getViewHeight();
             }
-            mWindowManager.addView(mFloatBallBigView, mBigViewParams);
+        }
+        makeSurePositionSame();
+        mWindowManager.addView(mFloatBallBigView, mBigViewParams);
+    }
+
+    /**
+     * 确保大小悬浮球 位置 一致
+     */
+    private void makeSurePositionSame() {
+        if (mSmallViewParams != null) {
+            if (MyWindowManager.isInLeftOfScreen(mCtx, mSmallViewParams.x)) {
+                mBigViewParams.x = 0;
+            } else {
+                mBigViewParams.x = MyWindowManager.mScreenWidth - mBigViewParams.width;
+            }
+            mBigViewParams.y = mSmallViewParams.y;
         }
     }
 
     public void removeBigFloatView() {
         if (mFloatBallBigView != null) {
             mWindowManager.removeView(mFloatBallBigView);
-            mFloatBallBigView = null;
         }
     }
 
@@ -101,23 +117,23 @@ public class FloatBallManager {
      * 创建一个火箭发射台，位置为屏幕底部。
      */
     public void createLauncher() {
-        int screenWidth = mWindowManager.getDefaultDisplay().getWidth();
-        int screenHeight = mWindowManager.getDefaultDisplay().getHeight();
         if (mLauncherView == null) {
             mLauncherView = new RocketLauncher(mCtx);
             if (mLauncherParams == null) {
                 mLauncherParams = new LayoutParams();
-                mLauncherParams.x = screenWidth / 2 - RocketLauncher.width / 2;
-                mLauncherParams.y = screenHeight - RocketLauncher.height;
+                mLauncherParams.x = mScreenWidth / 2 - RocketLauncher.mWidth / 2;
+                mLauncherParams.y = mScreenHeight - RocketLauncher.mHeight;
                 mLauncherParams.type = LayoutParams.TYPE_TOAST;
                 mLauncherParams.format = PixelFormat.RGBA_8888;
-                mLauncherParams.gravity = Gravity.LEFT | Gravity.TOP;
-                mLauncherParams.width = RocketLauncher.width;
-                mLauncherParams.height = RocketLauncher.height;
-            }
+                mSmallViewParams.flags =
+                        LayoutParams.FLAG_NOT_FOCUSABLE;
 
-            mWindowManager.addView(mLauncherView, mLauncherParams);
+                mLauncherParams.gravity = Gravity.LEFT | Gravity.TOP;
+                mLauncherParams.width = RocketLauncher.mWidth;
+                mLauncherParams.height = RocketLauncher.mHeight;
+            }
         }
+        mWindowManager.addView(mLauncherView, mLauncherParams);
     }
 
     /**
@@ -144,16 +160,12 @@ public class FloatBallManager {
      *
      * @return
      */
-    private String TAG = "FloatViewBig ";
 
     public boolean isReadyToLaunch() {
         boolean b1 = mSmallViewParams.x > mLauncherParams.x;
-        Log.i(TAG, "isReadyToLaunch: b1 " + b1);
-        boolean b2 = (mSmallViewParams.x + mSmallView.windowViewWidth
+        boolean b2 = (mSmallViewParams.x + mSmallView.mWindowViewWidth
                 <= (mLauncherParams.x + mLauncherParams.width));
-        Log.i(TAG, "isReadyToLaunch: b2 " + b2);
         boolean b3 = (mSmallViewParams.y + mSmallViewParams.height > mLauncherParams.y);
-        Log.i(TAG, "isReadyToLaunch: b3 " + b3);
         return b1 && b2 && b3;
     }
 }

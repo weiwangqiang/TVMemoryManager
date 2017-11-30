@@ -1,4 +1,4 @@
-package com.example.user.view.floatBall;
+package com.example.user.customView.floatBall;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,24 +12,24 @@ public class RocketLauncher extends LinearLayout {
 	/**
 	 * 记录火箭发射台的宽度
 	 */
-	public static int width;
+	public static int mWidth;
 
 	/**
 	 * 记录火箭发射台的高度
 	 */
-	public static int height;
+	public static int mHeight;
 
 	/**
 	 * 火箭发射台的背景图片
 	 */
-	private ImageView launcherImg;
+	private ImageView mLauncherImageView;
 
 	public RocketLauncher(Context context) {
 		super(context);
-		LayoutInflater.from(context).inflate(R.layout.launcher, this);
-		launcherImg = (ImageView) findViewById(R.id.launcher_img);
-		width = launcherImg.getLayoutParams().width;
-		height = launcherImg.getLayoutParams().height;
+		LayoutInflater.from(context).inflate(R.layout.view_float_ball_launcher, this);
+		mLauncherImageView = (ImageView) findViewById(R.id.launcher_img);
+		mWidth = mLauncherImageView.getLayoutParams().width;
+		mHeight = mLauncherImageView.getLayoutParams().height;
 	}
 
 	/**
@@ -37,9 +37,9 @@ public class RocketLauncher extends LinearLayout {
 	 */
 	public void updateLauncherStatus(boolean isReadyToLaunch) {
 		if (isReadyToLaunch) {
-			launcherImg.setImageResource(R.drawable.launcher_bg_fire);
+			mLauncherImageView.setImageResource(R.drawable.launcher_bg_fire);
 		} else {
-			launcherImg.setImageResource(R.drawable.launcher_bg_hold);
+			mLauncherImageView.setImageResource(R.drawable.launcher_bg_hold);
 		}
 	}
 

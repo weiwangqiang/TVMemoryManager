@@ -1,14 +1,8 @@
 package com.example.user.db;
 
-import android.database.sqlite.SQLiteDatabase;
+import android.content.Context;
 
-import com.example.user.bean.AppInfo;
-import com.example.user.core.BaseApplication;
-import com.example.user.dao.AppInfoDao;
-import com.example.user.dao.DaoMaster;
-import com.example.user.dao.DaoSession;
-
-import org.greenrobot.greendao.query.QueryBuilder;
+import com.example.user.bean.AppInfoBean;
 
 import java.util.List;
 
@@ -18,58 +12,27 @@ import java.util.List;
 
 public class DataBaseHelper {
     private final static String dbName = "APP_INFO";
-    private DaoMaster.DevOpenHelper mOpenHelper;
+    private AppInfoHelper  mAppInfoHelper;
 
-    public static DataBaseHelper getDataBaseHelper() {
+    public static DataBaseHelper getDataBaseHelper(Context mCtx) {
+        if(mDataBaseHelper == null)
+            mDataBaseHelper = new DataBaseHelper(mCtx) ;
         return mDataBaseHelper;
     }
 
-    public static DataBaseHelper mDataBaseHelper  = new DataBaseHelper() ;
-    private  DataBaseHelper(){
+    public static DataBaseHelper mDataBaseHelper  ;
+    private  DataBaseHelper(Context mCtx){
+        mAppInfoHelper = new AppInfoHelper(mCtx) ;
     }
-    public void addAlive(AppInfo appInfo){
-        DaoMaster daoMaster = new DaoMaster(getWritableDatabase());
-        DaoSession daoSession = daoMaster.newSession();
-        AppInfoDao userDao = daoSession.getAppInfoDao();
-        userDao.insert(appInfo);
+    public void addAlive(AppInfoBean appInfoBean){
+        mAppInfoHelper.insert(appInfoBean);
     }
-    public void deleteAlive(AppInfo appInfo){
+    public void deleteAlive(AppInfoBean appInfoBean){
         //挨个删
-        DaoMaster daoMaster = new DaoMaster(getWritableDatabase());
-        DaoSession daoSession = daoMaster.newSession();
-        AppInfoDao userDao = daoSession.getAppInfoDao();
-        userDao.delete(appInfo);
+        mAppInfoHelper.delete(appInfoBean);
     }
-    public List<AppInfo> getAliveList(){
+    public List<AppInfoBean> getAliveList(){
         //根据关键词获取一定有序的集合
-        DaoMaster daoMaster = new DaoMaster(getReadableDatabase());
-        DaoSession daoSession = daoMaster.newSession();
-        AppInfoDao userDao = daoSession.getAppInfoDao();
-        QueryBuilder<AppInfo> qb = userDao.queryBuilder();
-        List<AppInfo> list = qb.list();
-        return list;
-    }
-
-    /**
-     * 获取可读数据库
-     */
-    private SQLiteDatabase getReadableDatabase() {
-        if (mOpenHelper == null) {
-            mOpenHelper = new DaoMaster.DevOpenHelper(
-                    BaseApplication.getmCtx(), dbName, null);
-        }
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        return db;
-    }
-    /**
-     * 获取可写数据库
-     */
-    private SQLiteDatabase getWritableDatabase() {
-        if (mOpenHelper == null) {
-            mOpenHelper = new DaoMaster.DevOpenHelper(
-                    BaseApplication.getmCtx(), dbName, null);
-        }
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        return db;
+         return mAppInfoHelper.selectAll() ;
     }
 }

@@ -13,14 +13,23 @@
         android:layout_margin="20dp"
         android:id="@+id/cpuText"
         android:layout_weight="1"
-        android:text="使用：0%"/>
+        android:text=""/>
     <TextView
-        android:layout_width="match_parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="20dp"
+    android:id="@+id/memory"
+    android:layout_weight="1"
+    android:text=" "/>
+    <Button
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        android:id="@+id/memory"
-        android:layout_weight="1"
-        android:text="0/m "/>
+        android:onClick="aliveList"
+        android:text="白名单"
+        android:id="@+id/aliveList"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp" />
+
 </LinearLayout>
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
@@ -33,9 +42,11 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_alignParentBottom="true"
         android:onClick="clear"
         android:text="一键清除"
-        android:id="@+id/clear"/>
+        android:id="@+id/clear"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

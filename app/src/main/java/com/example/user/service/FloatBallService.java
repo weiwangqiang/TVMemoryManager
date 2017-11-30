@@ -1,35 +1,32 @@
 package com.example.user.service;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-import com.example.user.core.BaseApplication;
-import com.example.user.view.floatBall.FloatBallManager;
-
-import static com.example.user.view.floatBall.FloatBallManager.floatBallManager;
+import com.example.user.customView.floatBall.FloatBallManager;
 
 /**
  * Created by user on 2017/11/22.
  */
 
 public class FloatBallService extends Service {
-    private String TAG = "FloatBallService" ;
+    private final String TAG = "FloatBallService" ;
     FloatBallManager mFloatBallManager ;
     @Override
     public void onCreate() {
         super.onCreate();
         mFloatBallManager = FloatBallManager.
-                getFloatBallManager(BaseApplication.getmCtx()) ;
+                getFloatBallManager(this) ;
+        mFloatBallManager.createBigFloatView();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mFloatBallManager.createSmallFloatView();
-        Log.i(TAG, "onStartCommand: ");
-        return super.onStartCommand(intent, flags, startId);
+        startForeground(1,new Notification());
+        return START_STICKY;
     }
 
     @Nullable

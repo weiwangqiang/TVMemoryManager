@@ -10,7 +10,7 @@
         android:background="@drawable/bg_small" >
 
         <TextView
-            android:id="@+id/percent"
+            android:id="@+id/mMemoryTextView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
@@ -19,7 +19,7 @@
     </LinearLayout>
     
     <ImageView 
-        android:id="@+id/rocket_img"
+        android:id="@+id/mRocketImageView"
         android:layout_width="45dp"
         android:layout_height="90dp"
         android:src="@drawable/rocket"

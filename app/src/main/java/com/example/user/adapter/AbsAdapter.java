@@ -1,4 +1,4 @@
-package com.example.user.view.adapter;
+package com.example.user.adapter;
 
 /**
  * Created by user on 2017/11/21.
@@ -22,37 +22,16 @@ public abstract class AbsAdapter<T> extends
     protected int mLayout;
     protected final int TYPE_ITEM = 1;
 
-    public int getDataSize() {
-      return (data == null ? 0 : data.size()) ;
-    }
-
-    private List<T> data;
+    private List<T> data = new ArrayList<>();
 
     public AbsAdapter(@LayoutRes int layout) {
         mLayout = layout;
     }
 
-    public void clearAll() {
-        if (data == null) return;
-        data.clear();
-    }
 
     public void upDate(List<T> list) {
-        data = new ArrayList<>(list);
-        notifyDataSetChanged();
-    }
-
-    public void appendDate(List<T> list) {
-        appendDate(list, list.size());
-
-    }
-
-    public void appendDate(List<T> list, int position) {
-        if (data == null) {
-            data = new ArrayList<>(list);
-        } else {
-            data.addAll(list);
-        }
+        data.clear();
+        data.addAll(list);
         notifyDataSetChanged();
     }
 
@@ -68,18 +47,18 @@ public abstract class AbsAdapter<T> extends
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            bindItemViewHolder(holder, position, data.get(position));
+        bindItemViewHolder(holder, position, data.get(position));
     }
 
     @Override
     public int getItemViewType(int position) {
-            return TYPE_ITEM;
+        return TYPE_ITEM;
     }
 
 
     @Override
     public int getItemCount() {
-        return data.size() ;
+        return data.size();
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {
@@ -99,6 +78,7 @@ public abstract class AbsAdapter<T> extends
             return v;
         }
     }
+
     /**
      * 获取ItemViewHolder
      *

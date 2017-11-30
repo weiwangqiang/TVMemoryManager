@@ -20,156 +20,140 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.user.bean.AppInfo;
+import com.example.user.bean.AppInfoBean;
+import com.example.user.bean.CpuBean;
+import com.example.user.bean.MemoryBean;
 import com.example.user.core.BaseApplication;
-import com.example.user.model.ProcessAlive;
+import com.example.user.customView.ClearProcessWaitDialog;
+import com.example.user.source.ProcessAliveRepository;
 import com.example.user.service.FloatBallService;
+import com.example.user.source.IProcessTaskListener;
+import com.example.user.source.ISystemDataSource;
+import com.example.user.source.ProcessTaskRepository;
+import com.example.user.source.SystemRepository;
 import com.example.user.tvmanager.R;
-import com.example.user.utils.CpuManager;
-import com.example.user.utils.MemoryManager;
-import com.example.user.utils.TaskManager;
-import com.example.user.view.adapter.BgAdapter;
+import com.example.user.adapter.AppRecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import rx.Observable;
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+public class MainActivity extends Activity implements ISystemDataSource,IProcessTaskListener {
+    private final static String TAG = "MainActivity";
+    private final  String CPU_RATE = "cpu 使用率：";
+    private final String MEMORY_RATE = "内存使用率：";
+    private final String PERCENT = "%";
 
-import static com.example.user.utils.MemoryManager.getUsedPercentValue;
-
-/*
- * MainActivity class that loads MainFragment
- */
-public class MainActivity extends Activity {
-    private static String TAG = "MainActivity";
-    private TextView cup;
-    private TextView memory;
-    private RecyclerView recyclerView;
-    private ProcessAlive processAlive = ProcessAlive.getProcessAlive();
-    private BgAdapter adapter;
-    private Timer timer;
-    List<AppInfo> list = new ArrayList<>();
+    private int    mBeforeSize = 0;
+    private boolean mClearing = false;
+    private TextView mCpuTextView;
+    private TextView mMemoryTextView;
+    private RecyclerView mRecyclerView;
+    private ProcessAliveRepository mProcessAliveRepository = ProcessAliveRepository.getProcessAlive();
+    private AppRecyclerViewAdapter mAdapter;
+    private  List<AppInfoBean> mList = new ArrayList<>();
     private Context mCtx = BaseApplication.getmCtx();
+    private SystemRepository mSystemRepository ;
+    private ProcessTaskRepository mProcessTaskRepository ;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        init();
+        initView();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new RunTask(), 0, 10 * 1000);
+        mSystemRepository.registerUpDateListener(this);
+        mProcessTaskRepository.registerTaskListener(this);
+        mProcessTaskRepository.upDateProcessTaskList();
         startService(new Intent(this, FloatBallService.class));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        timer.cancel();
+        mSystemRepository.unRegisterUpDateListener(this);
+        mProcessTaskRepository.unRegisterTaskListener(this);
     }
 
-    private class RunTask extends TimerTask {
-
-        @Override
-        public void run() {
-            recyclerView.post(new Runnable() {
-                @Override
-                public void run() {
-                    cup.setText("cup使用率：" + CpuManager.getProcessCpuRate() + "%");
-                    memory.setText("内存使用率：" + getUsedPercentValue(mCtx));
-                }
-            });
-        }
+    @Override
+    public void onUpDateCpuRate(CpuBean cpuBean) {
+        mCpuTextView.setText(CPU_RATE+cpuBean.getRate()+PERCENT);
     }
 
-    private void init() {
-        cup = (TextView) findViewById(R.id.cpuText);
-        memory = (TextView) findViewById(R.id.memory);
-        cup.setText("cup使用率：" + CpuManager.getProcessCpuRate() + "%");
-        memory.setText("内存使用率：" + getUsedPercentValue(mCtx));
+    @Override
+    public void onUpDateMemoryRate(MemoryBean memoryBean) {
+        mMemoryTextView.setText(MEMORY_RATE + memoryBean.getRate()+PERCENT);
+    }
 
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        adapter = new BgAdapter(this, R.layout.activity_back_manager_item);
-        adapter.setListener(new BgAdapter.onItemClickListener() {
+    private void initView() {
+        mCpuTextView = (TextView) findViewById(R.id.cpuText);
+        mMemoryTextView = (TextView) findViewById(R.id.memory);
+        mSystemRepository = SystemRepository.getInstance() ;
+        mProcessTaskRepository = ProcessTaskRepository.getInstance();
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        mAdapter = new AppRecyclerViewAdapter(this, R.layout.item_background_manager);
+        mAdapter.setOnLockListener(new AppRecyclerViewAdapter.onLockClickListener() {
 
             @Override
-            public void OnItemClick(AppInfo appInfo) {
-                if (appInfo.isLock()) {
-                    processAlive.removeAlive(appInfo);
+            public void OnLockClick(AppInfoBean appInfoBean) {
+                if (appInfoBean.isLock()) {
+                    mProcessAliveRepository.removeAlive(appInfoBean);
                 } else {
-                    processAlive.addAlive(appInfo);
+                    mProcessAliveRepository.addAlive(appInfoBean);
                 }
-                appInfo.setLock(!appInfo.isLock());
-                adapter.notifyDataSetChanged();
+                appInfoBean.setLock(!appInfoBean.isLock());
+                mAdapter.notifyDataSetChanged();
             }
         });
         LinearLayoutManager manager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(manager);
-        recyclerView.setAdapter(adapter);
-        list.addAll(TaskManager.getAppInfoList(getApplication()));
-        adapter.upDate(list);
+        mRecyclerView.setLayoutManager(manager);
+        mRecyclerView.setAdapter(mAdapter);
+        mAdapter.upDate(mList);
+        mRecyclerView.setFocusable(true)  ;
     }
 
-    int beforeSize = 0;
-    boolean down = false; //todo
-
+    ClearProcessWaitDialog mClearProcessWaitDialog ;
     public void clear(View view) {
-        beforeSize = list.size();
-        down = true;
-        Log.i(TAG, " start clear: ----- " + list.size());
-        Observable.from(list)
-                .observeOn(Schedulers.computation())
-                .filter(new Func1<AppInfo, Boolean>() {
-                    @Override
-                    public Boolean call(AppInfo appInfo) {
-                        if (appInfo.isLock()) return false;
-                        return TaskManager.killProcess(mCtx, appInfo.getPackageName());
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<AppInfo>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.i(TAG, "onCompleted: complete");
-                        upDate();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        upDate();
-                    }
-
-                    @Override
-                    public void onNext(AppInfo appInfo) {
-                        //被杀掉的进程
-                        Log.i(TAG, "onNext: be killed  " + appInfo.getName());
-                    }
-                });
-
+        if(mClearing){
+            return;
+        }
+        mClearing = true;
+        mClearProcessWaitDialog = new ClearProcessWaitDialog(this);
+        mClearProcessWaitDialog.show();
+        mBeforeSize = mList.size();
+        mProcessTaskRepository.beginKillProcessTask();
     }
 
     private void upDate() {
-        list.clear();
-        list.addAll(TaskManager.getAppInfoList(getApplication()));
-        adapter.upDate(list);
-        cup.setText("cup使用率：" + CpuManager.getProcessCpuRate() + "%");
-        memory.setText("内存使用率：" + MemoryManager.getUsedPercentValue(mCtx));
-        Toast.makeText(mCtx, "清除前进程数：" + beforeSize + "\n " +
-                "清除后进程数 ：" + list.size(), Toast.LENGTH_SHORT).show();
+        if(mClearing)
+        Toast.makeText(mCtx, "清除前进程数：" + mBeforeSize + "\n " +
+                "清除后进程数 ：" + mList.size(), Toast.LENGTH_SHORT).show();
+        mAdapter.upDate(mList);
+        mClearing = false;
+        if(mClearProcessWaitDialog != null){
+            mClearProcessWaitDialog.cancel() ;
+        }
+    }
+    public void aliveList(View view){
+        startActivity(new Intent(this,AliveListActivity.class));
+    }
+    @Override
+    public void onTaskFinish(List<AppInfoBean> list) {
+        mSystemRepository.upDate();
+        mList.clear();
+        mList.addAll(list);
+        upDate();
+    }
+
+    @Override
+    public void onTaskProgress(float rate) {
+
     }
 }
